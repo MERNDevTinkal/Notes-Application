@@ -4,7 +4,7 @@ import isAuthenticated from "../middleware/isAuthenticated.js"
 
 const router = express.Router();
 
-router.route("/").post(isAuthenticated , createnote).get(getAllnote) ;
+router.route("/").post(isAuthenticated , createnote).get(  isAuthenticated, getAllnote) ;
 router.route("/:noteId").put( isAuthenticated , updatenote).delete(isAuthenticated , deletenote) ;
 
 

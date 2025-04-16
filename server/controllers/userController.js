@@ -1,7 +1,7 @@
 import UserModel from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { SendVerificationCode } from "../middleware/Email.js";
+import { SendVerificationCode, WelcomeEmail } from "../middleware/Email.js";
 
 // Register User
 export const register = async (req, res) => {
@@ -34,7 +34,7 @@ export const register = async (req, res) => {
       isVerified: false,
     });
 
-    await SendVerificationCode(user.email, verificationCode);
+    await SendVerificationCode(user.email, user.fullName, verificationCode);
 
     return res.status(201).json({
       success: true,
@@ -67,6 +67,8 @@ export const VerifyEmail = async (req, res) => {
     user.verificationCode = undefined;
     await user.save();
 
+    await WelcomeEmail(user.email, user.fullName);
+
     return res.status(200).json({
       success: true,
       message: "Email verified successfully.",
@@ -81,6 +83,7 @@ export const VerifyEmail = async (req, res) => {
 };
 
 // Login
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -98,6 +101,15 @@ export const login = async (req, res) => {
       return res.status(401).json({
         success: false,
         message: "Incorrect email or password.",
+      });
+    }
+
+    //  Check if user is verified before allowing login
+    
+    if (!existingUser.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before logging in.",
       });
     }
 
@@ -135,6 +147,7 @@ export const login = async (req, res) => {
     });
   }
 };
+
 
 // Logout
 export const logout = async (req, res) => {
