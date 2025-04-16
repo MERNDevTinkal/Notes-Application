@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose  from "mongoose";
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -13,7 +13,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+  isVerified: {
+    type: Boolean,
+    default : false,
+  },
+  verificationCode : String,
+} , {timestamps : true});
 
 const UserModel = mongoose.model("user", userSchema);
 export default UserModel;
