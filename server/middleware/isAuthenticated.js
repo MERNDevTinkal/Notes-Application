@@ -20,8 +20,7 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
 
-    // Save user ID
-    req.id = decode.userId;
+    req.user = decode; 
 
     next();
   } catch (error) {
@@ -34,5 +33,3 @@ const isAuthenticated = async (req, res, next) => {
 };
 
 export default isAuthenticated;
-
-

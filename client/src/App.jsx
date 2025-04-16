@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import { Toaster } from 'react-hot-toast'
+import Verify from './pages/Verify'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <ToastContainer />
       <Toaster position="top-right" />
       <Routes>
+      <Route path="/verify-email" element={<Verify />} />
         <Route path="/" element={<Register />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

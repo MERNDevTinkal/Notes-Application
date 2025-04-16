@@ -15,30 +15,50 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
+    const normalizedEmail = email.toLowerCase();
+
+    const existingUser = await UserModel.findOne({ email: normalizedEmail });
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Case 1: Already registered & verified
+    if (existingUser && existingUser.isVerified) {
       return res.status(400).json({
         success: false,
         message: "User already registered with this email.",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Case 2: Registered but not verified  Update OTP & Resend
+    if (existingUser && !existingUser.isVerified) {
+      existingUser.fullName = fullName;
+      existingUser.password = hashedPassword;
+      existingUser.verificationCode = verificationCode;
+      await existingUser.save();
 
+      await SendVerificationCode(normalizedEmail, fullName, verificationCode);
+
+      return res.status(200).json({
+        success: true,
+        message: "A new OTP has been sent to your email.",
+      });
+    }
+
+    // Case 3: New user
     const user = await UserModel.create({
       fullName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       verificationCode,
       isVerified: false,
     });
 
-    await SendVerificationCode(user.email, user.fullName, verificationCode);
+    await SendVerificationCode(normalizedEmail, fullName, verificationCode);
 
     return res.status(201).json({
       success: true,
-      message: "Account created successfully. Verification code sent to email.",
+      message: "Verification code sent to email.",
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -64,7 +84,7 @@ export const VerifyEmail = async (req, res) => {
     }
 
     user.isVerified = true;
-    user.verificationCode = undefined;
+    user.verificationCode = undefined; 
     await user.save();
 
     await WelcomeEmail(user.email, user.fullName);
@@ -81,6 +101,7 @@ export const VerifyEmail = async (req, res) => {
     });
   }
 };
+
 
 // Login
 
@@ -105,7 +126,7 @@ export const login = async (req, res) => {
     }
 
     //  Check if user is verified before allowing login
-    
+
     if (!existingUser.isVerified) {
       return res.status(403).json({
         success: false,
