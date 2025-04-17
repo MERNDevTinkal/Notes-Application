@@ -17,7 +17,7 @@ const Login = () => {
     try {
       const res = await axiosInstance.post('/user/login', {
         email: data.email.toLowerCase(),
-        password: data.password
+        password: data.password,
       })
       toast.success(res.data.message)
       navigate('/home')

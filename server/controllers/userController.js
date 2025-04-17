@@ -144,7 +144,11 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: existingUser._id },
+      {
+        userId: existingUser._id,
+        fullName: existingUser.fullName,
+        email: existingUser.email,
+      },   
       process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );
@@ -182,6 +186,28 @@ export const logout = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",
+    });
+  }
+};
+
+ // to get user profile details 
+
+export const getUserDetails = async (req, res) => {
+  try {
+    const { fullName, email } = req.user;
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        fullName,
+        email,
+      },
+    });
+  } catch (error) {
+    console.error("Get User Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

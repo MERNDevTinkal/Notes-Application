@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const Verify = () => {
+    
     const navigate = useNavigate()
     const { state } = useLocation()
     const email = state?.email || ''

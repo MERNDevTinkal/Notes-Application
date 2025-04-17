@@ -1,14 +1,25 @@
-// Home.jsx
 import React, { useEffect, useState } from 'react'
 import axiosInstance from '../axiosInstance'
 import { toast } from 'react-hot-toast'
 import Navbar from '../components/Navbar'
+import { useForm } from 'react-hook-form'
+import { useUserDetails } from '../context/userDetail'
 
 const Home = () => {
+  const { user, fetchUserDetails } = useUserDetails()
+
   const [notes, setNotes] = useState([])
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
   const [editId, setEditId] = useState(null)
+
+  console.log(user);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors }
+  } = useForm()
 
   const fetchNotes = async () => {
     try {
@@ -20,11 +31,13 @@ const Home = () => {
   }
 
   useEffect(() => {
-    fetchNotes()
+    fetchNotes();
+    fetchUserDetails();
   }, [])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const onSubmit = async (data) => {
+    const { title, description } = data
+
     if (!title.trim() || !description.trim()) {
       return toast.error('Fields cannot be empty or spaces only')
     }
@@ -38,8 +51,7 @@ const Home = () => {
         toast.success(res.data.message || 'Note created')
       }
 
-      setTitle('')
-      setDescription('')
+      reset()
       setEditId(null)
       fetchNotes()
     } catch (error) {
@@ -51,9 +63,13 @@ const Home = () => {
     try {
       await axiosInstance.delete(`/note/${id}`)
       toast.success('Note deleted')
-      
+
+      if (editId === id) {
+        setEditId(null)
+        reset()
+      }
+
       fetchNotes()
-      
     } catch (error) {
       toast.error('Failed to delete')
     }
@@ -61,15 +77,22 @@ const Home = () => {
 
   const handleEdit = (note) => {
     setEditId(note._id)
-    setTitle(note.title)
-    setDescription(note.description)
+    setValue('title', note.title)
+    setValue('description', note.description)
   }
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-gray-100">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Welcome Name */}
+        {user?.fullName  && (
+          <h2 className="text-xl text-center text-indigo-400 mb-6">
+            Welcome, <span className="font-semibold">{user.fullName }</span> 👋
+          </h2>
+        )}
+
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold mb-2 text-indigo-400 flex items-center justify-center gap-3">
             <span>📝</span>
@@ -80,33 +103,31 @@ const Home = () => {
 
         {/* Note Form */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="bg-[#1e293b] p-6 rounded-xl shadow-lg border border-[#334155] mb-10"
         >
           <div className="space-y-4">
             <input
               type="text"
               placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              {...register('title', { required: true })}
               className="w-full p-3 rounded-lg bg-[#0f172a] text-white border border-[#334155] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              required
             />
+            {errors.title && <p className="text-red-500 text-sm">Title is required</p>}
+
             <textarea
               placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               rows={4}
+              {...register('description', { required: true })}
               className="w-full p-3 rounded-lg bg-[#0f172a] text-white border border-[#334155] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              required
             />
+            {errors.description && <p className="text-red-500 text-sm">Description is required</p>}
           </div>
+
           <button
             type="submit"
             className={`w-full mt-4 py-3 rounded-lg font-medium transition-all ${
-              editId 
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-indigo-600 hover:bg-indigo-700'
+              editId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
             {editId ? 'Save Changes' : 'Add New Note'}
