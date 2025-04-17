@@ -51,7 +51,9 @@ const Home = () => {
     try {
       await axiosInstance.delete(`/note/${id}`)
       toast.success('Note deleted')
+      
       fetchNotes()
+      
     } catch (error) {
       toast.error('Failed to delete')
     }
