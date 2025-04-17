@@ -19,7 +19,9 @@ export const register = async (req, res) => {
 
     const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Case 1: Already registered & verified
@@ -84,7 +86,7 @@ export const VerifyEmail = async (req, res) => {
     }
 
     user.isVerified = true;
-    user.verificationCode = undefined; 
+    user.verificationCode = undefined;
     await user.save();
 
     await WelcomeEmail(user.email, user.fullName);
@@ -101,7 +103,6 @@ export const VerifyEmail = async (req, res) => {
     });
   }
 };
-
 
 // Login
 
@@ -134,7 +135,10 @@ export const login = async (req, res) => {
       });
     }
 
-    const isPasswordMatched = await bcrypt.compare(password, existingUser.password);
+    const isPasswordMatched = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
 
     if (!isPasswordMatched) {
       return res.status(401).json({
@@ -146,9 +150,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       {
         userId: existingUser._id,
-        fullName: existingUser.fullName,
-        email: existingUser.email,
-      },   
+      },
       process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );
@@ -173,7 +175,6 @@ export const login = async (req, res) => {
   }
 };
 
-
 // Logout
 export const logout = async (req, res) => {
   try {
@@ -190,24 +191,32 @@ export const logout = async (req, res) => {
   }
 };
 
- // to get user profile details 
-
-export const getUserDetails = async (req, res) => {
+  // Get user details
+  
+export const getUserProfile = async (req, res) => {
   try {
-    const { fullName, email } = req.user;
-
+    const user = await UserModel.findById(req.user.userId); 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
     return res.status(200).json({
       success: true,
       user: {
-        fullName,
-        email,
+        fullName: user.fullName,
+        email: user.email,
       },
     });
   } catch (error) {
-    console.error("Get User Error:", error);
+    console.error("Error fetching user info", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
   }
 };
+
+
+
