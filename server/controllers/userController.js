@@ -165,6 +165,7 @@ export const login = async (req, res) => {
       .json({
         success: true,
         message: `Welcome back ${existingUser.fullName}`,
+        token
       });
   } catch (error) {
     console.error("Login error:", error);
@@ -192,7 +193,7 @@ export const logout = async (req, res) => {
 };
 
   // Get user details
-  
+
 export const getUserProfile = async (req, res) => {
   try {
     const user = await UserModel.findById(req.user.userId); 

@@ -5,7 +5,9 @@ import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 const Login = () => {
+
   const navigate = useNavigate()
+
 
   const {
     register,
@@ -19,6 +21,9 @@ const Login = () => {
         email: data.email.toLowerCase(),
         password: data.password,
       })
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token)
+    }
       toast.success(res.data.message)
       navigate('/home')
     } catch (err) {

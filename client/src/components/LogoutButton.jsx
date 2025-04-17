@@ -7,8 +7,12 @@ const LogoutButton = () => {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('token')
+
       await axiosInstance.post('/user/logout')
+
       toast.success("Logged out successfully")
+
       navigate('/login')
     } catch (error) {
       toast.error("Logout failed")
