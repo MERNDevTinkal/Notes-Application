@@ -1,11 +1,15 @@
 import axiosInstance from '../axiosInstance'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { useLoader } from '../context/LoaderContext'
 
 const LogoutButton = () => {
   const navigate = useNavigate()
+  const { setLoading } = useLoader();
 
   const handleLogout = async () => {
+    setLoading(true);
+
     try {
       localStorage.removeItem('token')
 
@@ -13,9 +17,11 @@ const LogoutButton = () => {
 
       toast.success("Logged out successfully")
 
-      navigate('/login')
+      navigate('/')
     } catch (error) {
       toast.error("Logout failed")
+    } finally {
+      setLoading(false);
     }
   }
 

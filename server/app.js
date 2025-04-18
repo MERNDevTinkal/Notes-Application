@@ -24,7 +24,7 @@ app.use(cors({
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/note", noteRouter);
 
-//  Static files path - CORRECTED
+//  Static files path 
 const _dirname = path.resolve();
 const clientPath = path.join(_dirname, "client", "dist");
 app.use(express.static(clientPath));

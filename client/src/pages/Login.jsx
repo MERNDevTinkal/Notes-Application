@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form'
 import axiosInstance from '../axiosInstance'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useLoader } from '../context/LoaderContext'
 
 const Login = () => {
 
   const navigate = useNavigate()
+  const { setLoading } = useLoader();
 
 
   const {
@@ -16,19 +18,23 @@ const Login = () => {
   } = useForm()
 
   const onSubmit = async (data) => {
+    setLoading(true);  
+
     try {
       const res = await axiosInstance.post('/user/login', {
         email: data.email.toLowerCase(),
         password: data.password,
       })
-    if (res.data.token) {
-      localStorage.setItem('token', res.data.token)
-    }
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token)
+      }
       toast.success(res.data.message)
       navigate('/home')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
-    }
+    }finally {
+      setLoading(false);  
+  }
   }
 
   return (
@@ -80,9 +86,8 @@ const Login = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 hover:scale-[1.03] ${
-            isSubmitting ? 'bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700'
-          } cursor-pointer`}
+          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 hover:scale-[1.03] ${isSubmitting ? 'bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700'
+            } cursor-pointer`}
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center gap-2">

@@ -4,14 +4,13 @@ import { toast } from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import { useForm } from 'react-hook-form'
 import { useUserDetails } from '../context/userDetail'
+import { useLoader } from '../context/LoaderContext'
 
 const Home = () => {
   const { user, fetchUserDetails } = useUserDetails()
-
   const [notes, setNotes] = useState([])
   const [editId, setEditId] = useState(null)
-
- // console.log(user);
+  const { setLoading } = useLoader();
 
   const {
     register,
@@ -22,11 +21,15 @@ const Home = () => {
   } = useForm()
 
   const fetchNotes = async () => {
+    setLoading(true); 
+
     try {
       const res = await axiosInstance.get('/note')
       setNotes(res.data.notes)
     } catch (error) {
       toast.error('Failed to fetch notes')
+    } finally {
+      setLoading(false); 
     }
   }
 
@@ -42,6 +45,8 @@ const Home = () => {
     }
 
     try {
+      setLoading(true); 
+
       if (editId) {
         const res = await axiosInstance.put(`/note/${editId}`, { title, description })
         toast.success(res.data.message || 'Note updated')
@@ -55,11 +60,15 @@ const Home = () => {
       fetchNotes()
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong')
+    } finally {
+      setLoading(false); 
     }
   }
 
   const handleDelete = async (id) => {
     try {
+      setLoading(true); 
+
       await axiosInstance.delete(`/note/${id}`)
       toast.success('Note deleted')
 
@@ -71,6 +80,8 @@ const Home = () => {
       fetchNotes()
     } catch (error) {
       toast.error('Failed to delete')
+    } finally {
+      setLoading(false); 
     }
   }
 
@@ -86,9 +97,9 @@ const Home = () => {
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Welcome Name */}
-        {user?.fullName  && (
+        {user?.fullName && (
           <h2 className="text-xl text-center text-indigo-400 mb-6">
-            Welcome, <span className="font-semibold">{user.fullName }</span> 👋
+            Welcome, <span className="font-semibold">{user.fullName}</span> 👋
           </h2>
         )}
 
@@ -125,9 +136,8 @@ const Home = () => {
 
           <button
             type="submit"
-            className={`w-full mt-4 py-3 rounded-lg font-medium transition-all ${
-              editId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'
-            }`}
+            className={`w-full mt-4 py-3 rounded-lg font-medium transition-all ${editId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'
+              }`}
           >
             {editId ? 'Save Changes' : 'Add New Note'}
           </button>

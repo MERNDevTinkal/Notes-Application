@@ -3,18 +3,23 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import axiosInstance from "../axiosInstance";
 import { useNavigate, Link } from "react-router-dom";
+import { useLoader } from "../context/LoaderContext";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { setLoading } = useLoader();
+
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    
+
   } = useForm();
 
   const onSubmit = async (data) => {
+    setLoading(true);
+
     try {
       const res = await axiosInstance.post("/user", {
         fullName: data.fullName,
@@ -23,9 +28,12 @@ const Register = () => {
       });
       toast.success(res.data.message);
 
-      navigate("/verify-email", { state: { email: data.email , } });
+      navigate("/verify-email", { state: { email: data.email, } });
     } catch (err) {
       toast.error(err.response?.data?.message || "Registration failed");
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -102,11 +110,10 @@ const Register = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${
-            isSubmitting
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.03] cursor-pointer"
-          }`}
+          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${isSubmitting
+            ? "bg-gray-600 cursor-not-allowed"
+            : "bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.03] cursor-pointer"
+            }`}
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center gap-2">

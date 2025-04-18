@@ -3,12 +3,14 @@ import { useForm } from 'react-hook-form'
 import axiosInstance from '../axiosInstance'
 import { toast } from 'react-toastify'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useLoader } from '../context/LoaderContext'  
 
 const Verify = () => {
     
     const navigate = useNavigate()
     const { state } = useLocation()
     const email = state?.email || ''
+    const { setLoading } = useLoader();  
 
     const {
         register,
@@ -17,12 +19,15 @@ const Verify = () => {
     } = useForm()
 
     const onSubmit = async ({ code }) => {
+        setLoading(true);  
         try {
             const res = await axiosInstance.post('/user/verifyEmail', { code })
             toast.success(res.data.message)
             navigate('/login')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Verification failed')
+        } finally {
+            setLoading(false);  
         }
     }
 
@@ -48,7 +53,6 @@ const Verify = () => {
                                 value: /^[0-9]{6}$/,
                                 message: 'OTP must be exactly 6 digits'
                             }
-
                         })}
                         className="w-full px-4 py-3 bg-[#0f172a] border border-[#334155] rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-2"
                     />
