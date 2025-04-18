@@ -11,7 +11,7 @@ const Home = () => {
   const [notes, setNotes] = useState([])
   const [editId, setEditId] = useState(null)
 
-  console.log(user);
+ // console.log(user);
 
   const {
     register,

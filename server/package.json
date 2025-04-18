@@ -7,8 +7,9 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server/app.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
+    "start": "npm install && npm install --prefix client && npm run build --prefix client && node server/app.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -16,7 +17,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "mern_project": "file:",
     "mongoose": "^8.13.2",

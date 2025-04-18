@@ -15,6 +15,7 @@
     "axios": "^1.8.4",
     "client": "file:",
     "jwt-decode": "^4.0.0",
+    "mern_project": "file:..",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
