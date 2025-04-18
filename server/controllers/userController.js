@@ -176,7 +176,8 @@ export const login = async (req, res) => {
   }
 };
 
-// Logout
+         // Logout
+
 export const logout = async (req, res) => {
   try {
     return res.status(200).cookie("token", "", { maxAge: 0 }).json({
@@ -192,32 +193,46 @@ export const logout = async (req, res) => {
   }
 };
 
-  // Get user details
+       // verify 
 
-export const getUserProfile = async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.user.userId); 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      user: {
-        fullName: user.fullName,
-        email: user.email,
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching user info", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-};
+ export const verify = async (req, res) => {
+   try {
+     const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+ 
+     if (!token) {
+       return res.status(401).json({
+         success: false,
+         message: "No token provided, authentication failed",
+       });
+     }
+ 
+     const decoded = jwt.verify(token, process.env.SECRET_KEY);
+ 
+     const user = await UserModel.findById(decoded.userId).select("-password");
+ 
+     if (!user) {
+       return res.status(200).json({
+         success: false,
+         message: "User not found",
+       });
+     }
+ 
+     return res.status(200).json({
+       success: true,
+       user,
+     });
+   } catch (error) {
+     console.error("Verify error:", error);
+     return res.status(500).json({
+       success: false,
+       message: "Internal server error",
+     });
+   }
+ };
+ 
+  
 
+
+ 
 
 

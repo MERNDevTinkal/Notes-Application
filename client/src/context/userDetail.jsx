@@ -1,33 +1,36 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import axiosInstance from "../axiosInstance";
 
 const UserDetailsContext = createContext();
 
 export const UserDetailsProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
 
-    // Fetch User Details from API
-    const fetchUserDetails = async () => {
-        try {
-            const response = await axiosInstance.get("/user/me");
-           // console.log("User details fetched:", response.data.user);
+  const [user, setUser] = useState(null);
 
-            setUser(response.data.user);
+  const fetchUserDetails = async () => {
+    try {
+      const res = await axiosInstance.get("/user/verify");
 
-        } catch (error) {
-            console.error("Error fetching user details", error);
-        }
-    };
+      if (res.data.success) {
+        setUser(res.data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+        console.log("error in user verification", error);
+      setUser(null);
+    }
+  };
 
-    return (
-        <UserDetailsContext.Provider value={{ user, fetchUserDetails }}>
-            {children}
-        </UserDetailsContext.Provider>
-    );
+  useEffect(() => {
+    fetchUserDetails(); 
+  }, []);
+
+  return (
+    <UserDetailsContext.Provider value={{ user, setUser, fetchUserDetails }}>
+      {children}
+    </UserDetailsContext.Provider>
+  );
 };
 
-
-export const useUserDetails = () => {
-
-    return useContext(UserDetailsContext);
-};
+export const useUserDetails = () => useContext(UserDetailsContext);

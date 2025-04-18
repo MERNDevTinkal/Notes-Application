@@ -32,7 +32,6 @@ const Home = () => {
 
   useEffect(() => {
     fetchNotes();
-    fetchUserDetails();
   }, [])
 
   const onSubmit = async (data) => {
