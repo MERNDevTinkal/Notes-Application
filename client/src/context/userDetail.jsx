@@ -1,17 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useLoader } from "./LoaderContext";
 import axiosInstance from "../axiosInstance";
 
 const UserDetailsContext = createContext();
 
 export const UserDetailsProvider = ({ children }) => {
-
   const [user, setUser] = useState(null);
-  const { setLoading } = useLoader();
+  const [isLoading, setIsLoading] = useState(true); 
 
   const fetchUserDetails = async () => {
-    setLoading(true);
     try {
+      setIsLoading(true); 
       const res = await axiosInstance.get("/user/verify");
 
       if (res.data.success) {
@@ -20,12 +18,10 @@ export const UserDetailsProvider = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      console.log("Error in user verification", error);
-
+      console.log("error in user verification", error);
       setUser(null);
-
     } finally {
-      setLoading(false);
+      setIsLoading(false); 
     }
   };
 
@@ -34,7 +30,7 @@ export const UserDetailsProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserDetailsContext.Provider value={{ user, setUser, fetchUserDetails }}>
+    <UserDetailsContext.Provider value={{ user, setUser, fetchUserDetails, isLoading }}>
       {children}
     </UserDetailsContext.Provider>
   );

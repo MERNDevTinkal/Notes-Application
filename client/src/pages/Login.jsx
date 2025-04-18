@@ -1,15 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import axiosInstance from '../axiosInstance'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { useLoader } from '../context/LoaderContext'
 
 const Login = () => {
-
   const navigate = useNavigate()
-  const { setLoading } = useLoader();
-
+  const [loading, setLoading] = useState(false)
 
   const {
     register,
@@ -18,9 +15,8 @@ const Login = () => {
   } = useForm()
 
   const onSubmit = async (data) => {
-    setLoading(true);  
-
     try {
+      setLoading(true)
       const res = await axiosInstance.post('/user/login', {
         email: data.email.toLowerCase(),
         password: data.password,
@@ -32,9 +28,9 @@ const Login = () => {
       navigate('/home')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed')
-    }finally {
-      setLoading(false);  
-  }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -53,7 +49,7 @@ const Login = () => {
               {...register('email', {
                 required: 'Email is required',
                 pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
                   message: 'Enter a valid email address'
                 }
               })}
@@ -85,11 +81,14 @@ const Login = () => {
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 hover:scale-[1.03] ${isSubmitting ? 'bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700'
-            } cursor-pointer`}
+          disabled={loading || isSubmitting}
+          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${
+            loading || isSubmitting
+              ? 'bg-gray-600 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.03] cursor-pointer'
+          }`}
         >
-          {isSubmitting ? (
+          {loading || isSubmitting ? (
             <div className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               <span>Signing In...</span>

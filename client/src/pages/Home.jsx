@@ -4,13 +4,14 @@ import { toast } from 'react-hot-toast'
 import Navbar from '../components/Navbar'
 import { useForm } from 'react-hook-form'
 import { useUserDetails } from '../context/userDetail'
-import { useLoader } from '../context/LoaderContext'
 
 const Home = () => {
-  const { user, fetchUserDetails } = useUserDetails()
+  const { user } = useUserDetails()
+
   const [notes, setNotes] = useState([])
   const [editId, setEditId] = useState(null)
-  const { setLoading } = useLoader();
+  const [formLoading, setFormLoading] = useState(false)
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null)
 
   const {
     register,
@@ -21,20 +22,16 @@ const Home = () => {
   } = useForm()
 
   const fetchNotes = async () => {
-    setLoading(true); 
-
     try {
       const res = await axiosInstance.get('/note')
       setNotes(res.data.notes)
     } catch (error) {
       toast.error('Failed to fetch notes')
-    } finally {
-      setLoading(false); 
     }
   }
 
   useEffect(() => {
-    fetchNotes();
+    fetchNotes()
   }, [])
 
   const onSubmit = async (data) => {
@@ -44,9 +41,9 @@ const Home = () => {
       return toast.error('Fields cannot be empty or spaces only')
     }
 
-    try {
-      setLoading(true); 
+    setFormLoading(true)
 
+    try {
       if (editId) {
         const res = await axiosInstance.put(`/note/${editId}`, { title, description })
         toast.success(res.data.message || 'Note updated')
@@ -61,14 +58,13 @@ const Home = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong')
     } finally {
-      setLoading(false); 
+      setFormLoading(false)
     }
   }
 
   const handleDelete = async (id) => {
+    setDeleteLoadingId(id)
     try {
-      setLoading(true); 
-
       await axiosInstance.delete(`/note/${id}`)
       toast.success('Note deleted')
 
@@ -81,7 +77,7 @@ const Home = () => {
     } catch (error) {
       toast.error('Failed to delete')
     } finally {
-      setLoading(false); 
+      setDeleteLoadingId(null)
     }
   }
 
@@ -96,7 +92,6 @@ const Home = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Welcome Name */}
         {user?.fullName && (
           <h2 className="text-xl text-center text-indigo-400 mb-6">
             Welcome, <span className="font-semibold">{user.fullName}</span> 👋
@@ -131,15 +126,34 @@ const Home = () => {
               {...register('description', { required: true })}
               className="w-full p-3 rounded-lg bg-[#0f172a] text-white border border-[#334155] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
-            {errors.description && <p className="text-red-500 text-sm">Description is required</p>}
+            {errors.description && (
+              <p className="text-red-500 text-sm">Description is required</p>
+            )}
           </div>
 
           <button
             type="submit"
-            className={`w-full mt-4 py-3 rounded-lg font-medium transition-all ${editId ? 'bg-green-600 hover:bg-green-700' : 'bg-indigo-600 hover:bg-indigo-700'
-              }`}
+            disabled={formLoading}
+            className={`w-full mt-4 py-3 rounded-lg font-medium transition-all ${
+              formLoading
+                ? 'bg-gray-600 cursor-not-allowed'
+                : editId
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
           >
-            {editId ? 'Save Changes' : 'Add New Note'}
+            {formLoading ? (
+              <div className="flex justify-center items-center gap-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                <span className="ml-2">Submitting...</span>
+              </div>
+            ) : editId ? (
+              'Save Changes'
+            ) : (
+              'Add New Note'
+            )}
           </button>
         </form>
 
@@ -157,21 +171,33 @@ const Home = () => {
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-indigo-300 mb-1">{note.title}</h3>
+                    <h3 className="text-xl font-semibold text-indigo-300 mb-1">
+                      {note.title}
+                    </h3>
                     <p className="text-gray-300">{note.description}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(note)}
-                      className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                      disabled={formLoading}
+                      className={`px-4 py-2 rounded-lg transition-colors ${
+                        formLoading
+                          ? 'bg-gray-600 cursor-not-allowed'
+                          : 'bg-yellow-600 hover:bg-yellow-700'
+                      }`}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(note._id)}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      disabled={deleteLoadingId === note._id}
+                      className={`px-4 py-2 rounded-lg transition-colors ${
+                        deleteLoadingId === note._id
+                          ? 'bg-gray-600 cursor-not-allowed'
+                          : 'bg-red-600 hover:bg-red-700'
+                      }`}
                     >
-                      Delete
+                      {deleteLoadingId === note._id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </div>
