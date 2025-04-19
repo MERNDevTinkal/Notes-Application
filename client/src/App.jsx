@@ -14,8 +14,9 @@ function App() {
   
 
   return (
+    
+    <BrowserRouter>
     <UserDetailsProvider> 
-      <BrowserRouter>
         <ToastContainer />
         <Toaster position="top-right" />
         <Routes>
@@ -25,8 +26,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
         </Routes>
-      </BrowserRouter>
     </UserDetailsProvider>
+    </BrowserRouter>
+
 
   )
 }
