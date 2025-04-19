@@ -3,8 +3,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import axiosInstance from "../axiosInstance";
 import { useNavigate, Link } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Register = () => {
+
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -16,7 +19,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
-    setLoading(true); 
+    setLoading(true);
     try {
       const res = await axiosInstance.post("/user", {
         fullName: data.fullName,
@@ -28,7 +31,7 @@ const Register = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Registration failed");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -80,9 +83,9 @@ const Register = () => {
           </div>
 
           {/* Password */}
-          <div>
+          <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               {...register("password", {
                 required: "Password is required",
@@ -91,12 +94,16 @@ const Register = () => {
                   message: "Password must be at least 6 characters long",
                 },
               })}
-              className="w-full px-4 py-3 bg-[#0f172a] border border-[#334155] rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-[#0f172a] border border-[#334155] rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all pr-12"
             />
+            <div
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            </div>
             {errors.password && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.password.message}
-              </p>
+              <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
         </div>
@@ -104,12 +111,11 @@ const Register = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading || isSubmitting} 
-          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${
-            loading || isSubmitting
+          disabled={loading || isSubmitting}
+          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${loading || isSubmitting
               ? "bg-gray-600 cursor-not-allowed"
               : "bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.03] cursor-pointer"
-          }`}
+            }`}
         >
           {loading || isSubmitting ? (
             <div className="flex items-center justify-center gap-2">

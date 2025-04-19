@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form'
 import axiosInstance from '../axiosInstance'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -60,9 +62,9 @@ const Login = () => {
             )}
           </div>
 
-          <div>
+          <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               {...register('password', {
                 required: 'Password is required',
@@ -71,22 +73,28 @@ const Login = () => {
                   message: 'Password must be at least 6 characters long'
                 }
               })}
-              className="w-full px-4 py-3 bg-[#0f172a] border border-[#334155] rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full px-4 py-3 pr-12 bg-[#0f172a] border border-[#334155] rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
+            <div
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            </div>
             {errors.password && (
               <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
             )}
           </div>
+
         </div>
 
         <button
           type="submit"
           disabled={loading || isSubmitting}
-          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${
-            loading || isSubmitting
+          className={`w-full mt-8 py-3 text-white font-semibold rounded-xl transition-transform duration-300 ${loading || isSubmitting
               ? 'bg-gray-600 cursor-not-allowed'
               : 'bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.03] cursor-pointer'
-          }`}
+            }`}
         >
           {loading || isSubmitting ? (
             <div className="flex items-center justify-center gap-2">

@@ -11,6 +11,7 @@ import { UserDetailsProvider } from './context/userDetail'
 
 
 function App() {
+  
 
   return (
     <UserDetailsProvider> 
